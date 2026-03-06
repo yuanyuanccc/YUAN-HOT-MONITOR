@@ -65,9 +65,17 @@ export type PlatformSchedule = {
   isRunning: boolean
 }
 
+export type PlatformDailyTop = {
+  items: PlatformHotspotItem[]
+  lastFetchedAt: string | null
+  nextRunAt: string | null
+  isRunning: boolean
+}
+
 export type PlatformSnapshot = {
   options: PlatformOption[]
   items: PlatformHotspotItem[]
   batches: PlatformBatch[]
   schedule: PlatformSchedule
+  dailyTop: PlatformDailyTop
 }

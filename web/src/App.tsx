@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
+import { AceternityBackgroundBeams } from './components/ui/aceternity-background-beams'
+import { AceternitySpotlight } from './components/ui/aceternity-spotlight'
 
 type PlatformHotspotItem = {
   id: string
@@ -38,14 +40,34 @@ type PlatformOption = {
   needApiKey: boolean
 }
 
+type PlatformDailyTop = {
+  items: PlatformHotspotItem[]
+  lastFetchedAt: string | null
+  nextRunAt: string | null
+  isRunning: boolean
+}
+
 type PlatformSnapshot = {
   options: PlatformOption[]
   items: PlatformHotspotItem[]
   batches: PlatformBatch[]
   schedule: PlatformSchedule
+  dailyTop: PlatformDailyTop
 }
 
 const apiBase = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000'
+
+function normalizeSnapshot(data: PlatformSnapshot): PlatformSnapshot {
+  return {
+    ...data,
+    dailyTop: {
+      items: data.dailyTop?.items ?? [],
+      lastFetchedAt: data.dailyTop?.lastFetchedAt ?? null,
+      nextRunAt: data.dailyTop?.nextRunAt ?? null,
+      isRunning: data.dailyTop?.isRunning ?? false
+    }
+  }
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'keywords' | 'search'>('dashboard')
@@ -69,7 +91,7 @@ function App() {
     if (!response.ok) {
       throw new Error('平台热点加载失败')
     }
-    const data = (await response.json()) as PlatformSnapshot
+    const data = normalizeSnapshot((await response.json()) as PlatformSnapshot)
     setPlatformSnapshot(data)
     setIntervalMinutesInput(data.schedule.intervalMinutes)
     setScheduleEnabled(data.schedule.enabled)
@@ -140,7 +162,7 @@ function App() {
       if (!response.ok) {
         throw new Error('抓取失败')
       }
-      const data = (await response.json()) as PlatformSnapshot
+      const data = normalizeSnapshot((await response.json()) as PlatformSnapshot)
       setPlatformSnapshot(data)
     } catch {
       setError('平台热点抓取失败，请稍后重试。')
@@ -174,7 +196,7 @@ function App() {
       if (!response.ok) {
         throw new Error('调度保存失败')
       }
-      const data = (await response.json()) as PlatformSnapshot
+      const data = normalizeSnapshot((await response.json()) as PlatformSnapshot)
       setPlatformSnapshot(data)
     } catch {
       setError('自动抓取配置保存失败，请检查分钟数后重试。')
@@ -265,6 +287,8 @@ function App() {
     const readSet = new Set(readHotspotIds)
     return latestItems.filter((item) => !readSet.has(item.id))
   }, [latestItems, readHotspotIds])
+  const dailyTop = platformSnapshot?.dailyTop
+  const dailyTopItems = dailyTop?.items ?? []
 
   function getHeatLabel(level: 'low' | 'medium' | 'high') {
     if (level === 'high') {
@@ -278,12 +302,16 @@ function App() {
 
   return (
     <div className="dashboard-screen">
+      <AceternityBackgroundBeams className="screen-beams" />
+      <AceternitySpotlight className="screen-spotlight-left" fill="#7df0ff" />
+      <AceternitySpotlight className="screen-spotlight-right" fill="#6f8bff" />
+      <div className="screen-noise" />
       <header className="top-header">
         <div className="brand-wrap">
           <div className="brand-logo">≈</div>
           <div>
             <p className="brand-title">热点监控</p>
-            <p className="brand-subtitle">AI 实时热点追踪</p>
+            <p className="brand-subtitle">为 AI 创作提速 · 第一时间捕捉可分享价值</p>
           </div>
         </div>
         <div className="header-actions" ref={noticeWrapRef}>
@@ -323,6 +351,34 @@ function App() {
           ) : null}
         </div>
       </header>
+
+      <section className="daily-top-card">
+        <div className="daily-top-head">
+          <h3>自动抓取 · 热度 Top3</h3>
+          <span>{dailyTop?.isRunning ? '抓取中...' : '每日固定更新'}</span>
+        </div>
+        <p className="daily-top-meta">
+          上次更新：{dailyTop?.lastFetchedAt ? new Date(dailyTop.lastFetchedAt).toLocaleString() : '暂无'}
+          {' · '}
+          下次执行：{dailyTop?.nextRunAt ? new Date(dailyTop.nextRunAt).toLocaleString() : '待调度'}
+        </p>
+        <div className="daily-top-list">
+          {dailyTopItems.length === 0 ? (
+            <p className="daily-top-empty">当前还没有每日Top3结果，系统会在每天08:00自动抓取。</p>
+          ) : (
+            dailyTopItems.map((item, index) => (
+              <article key={item.id} className="daily-top-item">
+                <span className="daily-top-rank">#{index + 1}</span>
+                <div>
+                  <p className="daily-top-title">{item.title}</p>
+                  <p className="daily-top-platform">{item.platformLabel} · 热度 {item.heatScore}</p>
+                </div>
+                <a href={item.url} target="_blank" rel="noreferrer">查看</a>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
 
       <nav className="dashboard-tabs">
         <button className={activeTab === 'dashboard' ? 'tab active' : 'tab'} onClick={() => setActiveTab('dashboard')}>仪表盘</button>

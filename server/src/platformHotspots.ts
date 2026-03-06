@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import OpenAI from 'openai'
-import type { PlatformBatch, PlatformHotspotItem, PlatformId, PlatformOption, PlatformSchedule, PlatformSnapshot } from './types.js'
+import type { PlatformBatch, PlatformDailyTop, PlatformHotspotItem, PlatformId, PlatformOption, PlatformSchedule, PlatformSnapshot } from './types.js'
 
 type RawItem = {
   title: string
@@ -18,6 +18,7 @@ type SourceDefinition = {
 const DEFAULT_INTERVAL_MINUTES = 15
 const MIN_INTERVAL_MINUTES = 1
 const MAX_INTERVAL_MINUTES = 720
+const DAILY_TOP_HOUR = 8
 const LLM_MODEL = process.env.OPENROUTER_MODEL ?? 'openai/gpt-4o-mini'
 const LLM_API_KEY = process.env.OPENROUTER_API_KEY
 
@@ -41,6 +42,13 @@ const schedule: PlatformSchedule = {
 let latestItems: PlatformHotspotItem[] = []
 let latestBatches: PlatformBatch[] = []
 let timer: NodeJS.Timeout | null = null
+let dailyTopTimer: NodeJS.Timeout | null = null
+const dailyTop: PlatformDailyTop = {
+  items: [],
+  lastFetchedAt: null,
+  nextRunAt: null,
+  isRunning: false
+}
 
 function cleanText(value: string) {
   return value
@@ -575,6 +583,32 @@ function dedupeItems(items: PlatformHotspotItem[]) {
   return Array.from(map.values())
 }
 
+function getNextDailyRunDate(from = new Date()) {
+  const next = new Date(from)
+  next.setHours(DAILY_TOP_HOUR, 0, 0, 0)
+  if (next.getTime() <= from.getTime()) {
+    next.setDate(next.getDate() + 1)
+  }
+  return next
+}
+
+function pickDailyTop3(items: PlatformHotspotItem[]) {
+  return [...items]
+    .sort((a, b) => {
+      if (b.heatScore !== a.heatScore) {
+        return b.heatScore - a.heatScore
+      }
+      if (a.fetchedAt < b.fetchedAt) {
+        return 1
+      }
+      if (a.fetchedAt > b.fetchedAt) {
+        return -1
+      }
+      return 0
+    })
+    .slice(0, 3)
+}
+
 async function fetchAll(input?: { keyword?: string; selectedPlatforms?: PlatformId[] }) {
   const keywords = typeof input?.keyword === 'string'
     ? [normalizeKeyword(input.keyword)]
@@ -648,6 +682,22 @@ function rebuildTimer() {
   timer.unref()
 }
 
+function rebuildDailyTopTimer() {
+  if (dailyTopTimer) {
+    clearTimeout(dailyTopTimer)
+    dailyTopTimer = null
+  }
+  const nextRun = getNextDailyRunDate()
+  dailyTop.nextRunAt = nextRun.toISOString()
+  const delay = Math.max(1000, nextRun.getTime() - Date.now())
+  dailyTopTimer = setTimeout(() => {
+    void triggerDailyTopFetch().finally(() => {
+      rebuildDailyTopTimer()
+    })
+  }, delay)
+  dailyTopTimer.unref()
+}
+
 export async function triggerFetch() {
   if (schedule.isRunning) {
     return snapshotPlatformHotspots()
@@ -674,6 +724,21 @@ export async function triggerFetchWithConfig(input: { keyword?: string; selected
   return snapshotPlatformHotspots()
 }
 
+export async function triggerDailyTopFetch() {
+  if (dailyTop.isRunning) {
+    return snapshotPlatformHotspots()
+  }
+  dailyTop.isRunning = true
+  try {
+    await fetchAll()
+    dailyTop.items = pickDailyTop3(latestItems)
+    dailyTop.lastFetchedAt = new Date().toISOString()
+  } finally {
+    dailyTop.isRunning = false
+  }
+  return snapshotPlatformHotspots()
+}
+
 export function updateSchedule(input: { enabled?: boolean; intervalMinutes?: number; keywords?: string[]; selectedPlatforms?: PlatformId[] }) {
   if (typeof input.enabled === 'boolean') {
     schedule.enabled = input.enabled
@@ -694,11 +759,13 @@ export function snapshotPlatformHotspots(): PlatformSnapshot {
     options,
     items: latestItems,
     batches: latestBatches,
-    schedule: { ...schedule }
+    schedule: { ...schedule },
+    dailyTop: { ...dailyTop, items: [...dailyTop.items] }
   }
 }
 
 export function startPlatformScheduler() {
   rebuildTimer()
+  rebuildDailyTopTimer()
   void triggerFetch()
 }
