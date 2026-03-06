@@ -1,0 +1,114 @@
+[
+  {
+    "id": "f5125974-c149-472f-ab44-1b5c14013edc",
+    "title": "张杰 热点趋势分析",
+    "summary": "基于 过去24小时 时间范围内的样本文本，张杰 的传播热度为 79，建议结合人工核验后发布处置结论。",
+    "score": 79,
+    "riskLevel": "medium",
+    "actions": [
+      "核验来源真实性",
+      "准备统一口径回应",
+      "持续监控扩散速度"
+    ],
+    "createdAt": "2026-03-06T15:24:46.446Z",
+    "status": "pending",
+    "note": "",
+    "confirmedAt": null
+  },
+  {
+    "id": "e07b7700-85ec-41a0-894b-341371be969e",
+    "title": "三角洲 热点趋势分析",
+    "summary": "基于 过去24小时 时间范围内的样本文本，三角洲 的传播热度为 79，建议结合人工核验后发布处置结论。",
+    "score": 79,
+    "riskLevel": "medium",
+    "actions": [
+      "核验来源真实性",
+      "准备统一口径回应",
+      "持续监控扩散速度"
+    ],
+    "createdAt": "2026-03-06T15:24:35.713Z",
+    "status": "pending",
+    "note": "",
+    "confirmedAt": null
+  },
+  {
+    "id": "5a5eeaf3-c758-4010-9177-674de97c8306",
+    "title": "新能源车 热点趋势分析",
+    "summary": "基于 过去24小时 时间范围内的样本文本，新能源车 的传播热度为 79，建议结合人工核验后发布处置结论。",
+    "score": 79,
+    "riskLevel": "medium",
+    "actions": [
+      "核验来源真实性",
+      "准备统一口径回应",
+      "持续监控扩散速度"
+    ],
+    "createdAt": "2026-03-06T15:04:04.393Z",
+    "status": "rejected",
+    "note": "信息来源已交叉验证，允许发布。",
+    "confirmedAt": "2026-03-06T15:04:09.332Z"
+  },
+  {
+    "id": "dda1f42d-f92a-4c5c-b8e2-0eaff0d28970",
+    "title": "新能源车 热点趋势分析",
+    "summary": "基于 过去24小时 时间范围内的样本文本，新能源车 的传播热度为 79，建议结合人工核验后发布处置结论。",
+    "score": 79,
+    "riskLevel": "medium",
+    "actions": [
+      "核验来源真实性",
+      "准备统一口径回应",
+      "持续监控扩散速度"
+    ],
+    "createdAt": "2026-03-06T14:57:10.577Z",
+    "status": "pending",
+    "note": "",
+    "confirmedAt": null
+  },
+  {
+    "id": "7d7124e0-5fbe-426c-a612-c4e8a3fcff36",
+    "title": "lpl 热点趋势分析",
+    "summary": "基于 过去24小时 时间范围内的样本文本，lpl 的传播热度为 79，建议结合人工核验后发布处置结论。",
+    "score": 79,
+    "riskLevel": "medium",
+    "actions": [
+      "核验来源真实性",
+      "准备统一口径回应",
+      "持续监控扩散速度"
+    ],
+    "createdAt": "2026-03-06T14:51:51.059Z",
+    "status": "approved",
+    "note": "信息来源已交叉验证，允许发布。",
+    "confirmedAt": "2026-03-06T14:52:33.629Z"
+  },
+  {
+    "id": "ee7d1830-a5aa-449b-b26e-4c996660fbd6",
+    "title": "新能源车 热点趋势分析",
+    "summary": "基于 过去24小时 时间范围内的样本文本，新能源车 的传播热度为 79，建议结合人工核验后发布处置结论。",
+    "score": 79,
+    "riskLevel": "medium",
+    "actions": [
+      "核验来源真实性",
+      "准备统一口径回应",
+      "持续监控扩散速度"
+    ],
+    "createdAt": "2026-03-06T14:51:38.643Z",
+    "status": "pending",
+    "note": "",
+    "confirmedAt": null
+  },
+  {
+    "id": "489916ab-2edc-4b95-bd9b-ea64bc3f75ff",
+    "title": "AI?? 热点趋势分析",
+    "summary": "基于 ??6?? 时间范围内的样本文本，AI?? 的传播热度为 56，建议结合人工核验后发布处置结论。",
+    "score": 56,
+    "riskLevel": "low",
+    "actions": [
+      "核验来源真实性",
+      "准备统一口径回应",
+      "持续监控扩散速度"
+    ],
+    "createdAt": "2026-03-06T14:42:39.598Z",
+    "status": "approved",
+    "note": "??????",
+    "confirmedAt": "2026-03-06T14:43:05.224Z"
+  }
+]
